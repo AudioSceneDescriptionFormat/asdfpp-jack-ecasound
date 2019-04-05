@@ -718,7 +718,7 @@ std::tuple<size_t, Source*> Scene::_get_source(const std::string& source_id)
 
 namespace internal
 {
-  auto get_begin_and_end(pugi::xml_node element
+  inline auto get_begin_and_end(pugi::xml_node element
       , float parent_begin, std::optional<float> parent_end)
   {
     // TODO: support hh:mm:ss and similar formats
