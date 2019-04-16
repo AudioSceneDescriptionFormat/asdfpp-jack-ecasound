@@ -35,7 +35,6 @@ class JackEcasoundScene : public Scene
 {
 public:
   JackEcasoundScene(std::string_view filename
-      , std::string client_name
       , std::string input_port_prefix);
 
   ~JackEcasoundScene();

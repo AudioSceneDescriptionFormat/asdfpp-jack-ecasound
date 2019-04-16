@@ -118,10 +118,10 @@ Scene::FileInfo get_file_info(const std::string& path, float samplerate)
 
 
 JackEcasoundScene::JackEcasoundScene(std::string_view filename
-    , std::string client_name
     , std::string input_port_prefix)
 : Scene(filename, get_samplerate_from_jack(), get_file_info)
-, _client_name(std::move(client_name))
+// NB: we are trying to make the client name unique:
+, _client_name("ASDF-{}"_format(reinterpret_cast<std::uintptr_t>(this)))
 , _input_port_prefix(std::move(input_port_prefix))
 , _jack_ports(this->number_of_sources())
 {
