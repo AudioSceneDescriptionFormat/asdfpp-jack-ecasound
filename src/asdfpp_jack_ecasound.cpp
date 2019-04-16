@@ -22,6 +22,7 @@
 
 #include <fmt/format.h>
 #include <jack/jack.h>  // for jack_port_name_size()
+#include <thread>  // for std::this_thread::sleep_for()
 
 #include "asdfpp_jack_ecasound.h"
 
@@ -161,6 +162,10 @@ JackEcasoundScene::JackEcasoundScene(std::string_view filename
     eca_command(_eca, "cs-option -G:jack,\"{}\",recv"_format(_client_name));
     eca_command(_eca, "cs-connect");
     eca_command(_eca, "engine-launch");
+
+    // TODO: A better way to do that?
+    // Make sure that JACK ports are available for connections:
+    std::this_thread::sleep_for(std::chrono::milliseconds(500));
   }
   // TODO: add live inputs (from <head> section) to the JACK ports
   //_jack_ports.at(source_number).push_back(
