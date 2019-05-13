@@ -187,6 +187,14 @@ std::optional<quat> parse_rot(pugi::xml_node element)
   return {};
 }
 
+Transform parse_transform(pugi::xml_node element)
+{
+  return {
+    parse_rot(element),
+    parse_pos(element),
+  };
+}
+
 }  // end namespace (anonymous)
 
 
@@ -568,8 +576,7 @@ Scene::_setup_soundfile(pugi::xml_node element, const fs::path& path
     // NB: A separate channel transform isn't strictly necessary here, but it
     // makes the following code simpler.
     std::string channel_id{};
-    Transform transform{};
-    _add_channel_to_source(source_id, channel_id, begin, end, transform
+    _add_channel_to_source(source_id, channel_id, begin, end, Transform{}
         , playlist_entry, channel_ids, element);
   }
   for (auto child: element.children())
@@ -587,12 +594,8 @@ Scene::_setup_soundfile(pugi::xml_node element, const fs::path& path
     auto source_attr = child.attribute("source");
     source_id = _check_source_id(source_attr, child);
 
-    Transform transform{};
-
-    // TODO: get "pos" etc. from channel and add to transform
-
-    _add_channel_to_source(source_id, channel_id, begin, end, transform
-        , playlist_entry, channel_ids, child);
+    _add_channel_to_source(source_id, channel_id, begin, end
+        , parse_transform(child), playlist_entry, channel_ids, child);
 
     if (playlist_entry.channel_map.size() > info.channels)
     {
@@ -608,13 +611,10 @@ Scene::_setup_soundfile(pugi::xml_node element, const fs::path& path
   auto id_attr = element.attribute("id");
   // NB: ID may be empty
   std::string clip_id = _parse_xml_id(id_attr, element);
-  Transform transform{};
-
-  // TODO: get "pos" etc. from clip and add to transform
 
   // NB: This transformer applies to channel IDs and not to source IDs!
   _add_transformer(std::make_unique<ConstantTransformer>(
-      clip_id, begin, end, *this, transform), channel_ids);
+      clip_id, begin, end, *this, parse_transform(element)), channel_ids);
 
   _playlist.push_back(playlist_entry);
   assert(end);
@@ -910,15 +910,9 @@ std::optional<float> Scene::_parse_element(pugi::xml_node element
             "one <p> element", first_child, time_attr);
       }
 
-      Transform t;
-
-      // TODO: combine multiple parsing functions into a helper function?
-      t.translation = parse_pos(first_child);
-      t.rotation = parse_rot(first_child);
-      // TODO: read more attributes
-
       transformer = std::make_unique<ConstantTransformer>(
-          _parse_xml_id(id_attr, element), begin, end, *this, t);
+          _parse_xml_id(id_attr, element), begin, end, *this,
+          parse_transform(first_child));
     }
     else
     {
