@@ -29,8 +29,8 @@
 using namespace asdf;
 using namespace fmt::literals;
 
-// TODO: using "sndfile" made the JACK connection disconnect right after
-const static char* AI_OPTIONS = "resample-hq,auto,";
+// NB: using "sndfile" may cause JACK connections to disconnect after playback
+const static char* AI_OPTIONS = "resample-hq,auto,sndfile,";
 
 namespace
 {
