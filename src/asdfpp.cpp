@@ -625,7 +625,7 @@ Scene::_setup_soundfile(pugi::xml_node element, const fs::path& path
 /// This creates intentionally invalid XML IDs for internal use
 std::string Scene::_create_new_id()
 {
-  return ".asdf:"_format(_next_internal_id_suffix++);
+  return ".asdf:{}"_format(_next_internal_id_suffix++);
 }
 
 
