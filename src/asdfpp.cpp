@@ -472,8 +472,30 @@ void Scene::_parse_xml_data(std::string_view xml_data)
     throw ParseError("Only ASDF version 0.4 is supported", asdf, version_attr);
   }
 
-  // TODO: optional <head> and <body> elements
+  // NB: <head> and <body> elements are optional
+
+  auto element = asdf.first_child();
+
+  if (has_name(element, "head"))
+  {
+    // TODO: parse "element", find <meta> and <source> elements
+
+    element = element.next_sibling();
+    if (!has_name(element, "body"))
+    {
+      throw ParseError("<body> required after <head>", element);
+    }
+  }
+
   auto body = asdf;
+  if (has_name(element, "body"))
+  {
+    if (auto error = element.next_sibling(); error)
+    {
+      throw ParseError("No elements allowed after <body>", error);
+    }
+    body = element;
+  }
 
   // TODO: <body> cannot have begin/end/dur? Check this?
 
