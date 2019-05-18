@@ -465,7 +465,8 @@ void Scene::_parse_xml_data(std::string_view xml_data)
   auto version_attr = asdf.attribute("version");
   if (!version_attr)
   {
-    throw ParseError("'version' attribute is required in <asdf> element", asdf);
+    throw ParseError(
+        "\"version\" attribute is required in <asdf> element", asdf);
   }
   if (std::string(version_attr.value()) != "0.4")
   {
@@ -481,6 +482,11 @@ void Scene::_parse_xml_data(std::string_view xml_data)
     // TODO: parse "element", find <meta> and <source> elements
 
     element = element.next_sibling();
+    if (!element)
+    {
+      // TODO: is it possible to have <head> and nothing else?
+      return;
+    }
     if (!has_name(element, "body"))
     {
       throw ParseError("<body> required after <head>", element);
@@ -492,7 +498,7 @@ void Scene::_parse_xml_data(std::string_view xml_data)
   {
     if (auto error = element.next_sibling(); error)
     {
-      throw ParseError("No elements allowed after <body>", error);
+      throw ParseError("No content allowed after </body>", error);
     }
     body = element;
   }
