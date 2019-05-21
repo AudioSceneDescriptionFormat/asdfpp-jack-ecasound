@@ -23,14 +23,14 @@
 #include <fmt/format.h>
 #include <jack/jack.h>  // for jack_port_name_size()
 #include <thread>  // for std::this_thread::sleep_for()
+#include <vorbis/vorbisfile.h>  // for ov_fopen() etc.
 
 #include "asdfpp_jack_ecasound.h"
 
 using namespace asdf;
 using namespace fmt::literals;
 
-// NB: using "sndfile" may cause JACK connections to disconnect after playback
-const static char* AI_OPTIONS = "resample-hq,auto,sndfile,";
+const static char* AI_OPTIONS = "resample-hq,auto,";
 
 namespace
 {
@@ -111,6 +111,24 @@ Scene::FileInfo get_file_info(const std::string& path, float samplerate)
   auto [channels, samplerate_control] = parse_format_string(
       eca.last_string());
   assert(samplerate_control == samplerate);
+
+  // TODO: compiler switch to disable libvorbisfile dependency?
+
+  // TODO: check for file extension?
+
+  OggVorbis_File ov;
+  if (ov_fopen(path.c_str(), &ov) == 0)
+  {
+    channels = ov.vi->channels;
+
+    // TODO: compute resampled length!
+
+    // TODO: ov.vi->rate
+
+    length = ov_pcm_total(&ov, -1);
+  }
+  ov_clear(&ov);
+
   return {length, channels};
 }
 
@@ -148,6 +166,7 @@ JackEcasoundScene::JackEcasoundScene(std::string_view filename
       // TODO: set total duration of looped playback?
       // TODO: is infinite loop possible? which stop_time?
       eca_command(_eca, "ai-add playat,{}sa,select,{}sa,{}sa,{}\"{}\""_format(
+            // TODO: is duration correct for re-sampled sources?
             file.begin, file.skip, file.duration,
             AI_OPTIONS, escape_filename(file.path)));
 
