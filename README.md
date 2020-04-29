@@ -1,6 +1,9 @@
 C++ Implementation of the Audio Scene Description Format (ASDF)
 ===============================================================
 
+This is incomplete and obsolete and has been superseded by
+https://github.com/AudioSceneDescriptionFormat/asdf-rust.
+
 Dependencies
 ------------
 
